@@ -44,8 +44,14 @@ def build_vocab(examples: List[SentimentExample]) -> Dict[str, int]:
         Dict[str, int]: A dictionary representing the vocabulary, where each word is mapped to a unique index.
     """
     # TODO: Count unique words in all the examples from the training set
-    vocab: Dict[str, int] = None
+    vocab: Dict[str, int] = {}
+    word_counts = Counter()
 
+    for example in examples:
+        word_counts.update(example.words)
+    
+    #word_counts = Counter({'manzana': 3, 'pera': 2, 'naranja': 1})
+    vocab = {word:idx for idx, word in enumerate(word_counts.keys())}
     return vocab
 
 
@@ -65,6 +71,15 @@ def bag_of_words(
         torch.Tensor: A tensor representing the bag-of-words vector.
     """
     # TODO: Converts list of words into BoW, take into account the binary vs full
-    bow: torch.Tensor = None
+    bow: torch.Tensor = torch.zeros(len(vocab), dtype=torch.float32) #Xd ∈ R^|V|, where |V| is the size of the vocabulary
+    word_counts = Counter(text) #Count the frequency of each word in the text
+    if binary:
+        for word, idx in vocab.items():
+            if word in word_counts:
+                bow[idx] = 1 #presence or absence of the word in the text (binary represeentation)
+    else:
+        for word, idx in vocab.items():
+            bow[idx] = word_counts[word]
 
     return bow
+
